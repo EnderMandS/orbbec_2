@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="basic_tf" type="repub_imu.py" name="repub_imu" output="screen" />
+  <node pkg="basic_tf" type="tf_camera_imu.py" name="tf_camera_imu" output="screen" />
+
+  <include file="$(find OrbbecSDK_ROS1)/launch/gemini2.launch" />
+
+</launch>
