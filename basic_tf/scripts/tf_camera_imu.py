@@ -11,7 +11,7 @@ def publish_static_tf():
     static_transformStamped = geometry_msgs.msg.TransformStamped()
 
     static_transformStamped.header.stamp = rospy.Time.now()
-    static_transformStamped.header.frame_id = "camera_link"
+    static_transformStamped.header.frame_id = "camera"
     static_transformStamped.child_frame_id = "imu"
 
     # Set the transform values (replace with actual values)
@@ -25,7 +25,7 @@ def publish_static_tf():
 
     broadcaster.sendTransform(static_transformStamped)
 
-    rospy.loginfo("Static beoadcaster from camera_link to imu start.")
+    rospy.loginfo("Static beoadcaster from camera to imu start.")
 
     rospy.spin()
 
