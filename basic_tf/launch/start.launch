@@ -2,6 +2,8 @@
 
   <node pkg="basic_tf" type="repub_imu.py" name="repub_imu" output="screen" />
   <node pkg="basic_tf" type="tf_camera_imu.py" name="tf_camera_imu" output="screen" />
+  <!-- <node pkg="basic_tf" type="color_camera_rectify.py" name="color_camera_rectify" output="screen" /> -->
+  <!-- <node pkg="basic_tf" type="depth_camera_rectify.py" name="depth_camera_rectify" output="screen" /> -->
 
   <include file="$(find orbbec_camera)/launch/gemini2.launch" />
 
