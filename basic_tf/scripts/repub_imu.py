@@ -13,26 +13,34 @@ def callback(data):
     gx = data.angular_velocity.x
     gy = data.angular_velocity.y
     gz = data.angular_velocity.x
+
     data.linear_acceleration.x = az
     data.linear_acceleration.y = -ax
     data.linear_acceleration.z = -ay
     data.angular_velocity.x = gz
     data.angular_velocity.y = -gx
     data.angular_velocity.z = -gy
-    
-    # Publish the modified data
     pub.publish(data)
+
+    data.linear_acceleration.x = -ay
+    data.linear_acceleration.y = ax
+    data.linear_acceleration.z = az
+    data.angular_velocity.x = -gy
+    data.angular_velocity.y = gx
+    data.angular_velocity.z = gz
+    pub2.publish(data)
 
 def imu_listener():
     # Initialize the node
     rospy.init_node('imu_listener', anonymous=True)
 
     # Subscribe to the /imu_raw topic
-    rospy.Subscriber('/camera/gyro_accel/sample', Imu, callback)
+    rospy.Subscriber('/camera_intel/imu', Imu, callback)
 
     # Define the publisher
-    global pub
+    global pub, pub2
     pub = rospy.Publisher('/imu', Imu, queue_size=10)
+    pub2 = rospy.Publisher('/imu_euroc', Imu, queue_size=10)
 
     rospy.loginfo("Republish imu topic, change child frame id.")
 
