@@ -24,7 +24,8 @@ def main():
     tf_buffer = tf2_ros.Buffer(rospy.Duration(1.0)) # tf buffer length
     tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-    odom_pub = rospy.Publisher('/odom', Odometry, queue_size=1)
+    odom_pub = rospy.Publisher('/odom', Odometry, queue_size=5)
+    mavros_odom_pub = rospy.Publisher('/mavros/odometry/out', Odometry, queue_size=5)
 
     rospy.loginfo('Listening from odom to base_link, publish it to /odom')
 
@@ -32,7 +33,9 @@ def main():
     while not rospy.is_shutdown():
         try:
             trans = tf_buffer.lookup_transform('odom', 'base_link', rospy.Time.now(), rospy.Duration(1.0))
-            odom_pub.publish(tf_to_odom(trans))
+            msg = tf_to_odom(trans)
+            odom_pub.publish(msg)
+            mavros_odom_pub.publish(msg)
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
             # rospy.logwarn("%s", e)
             continue
