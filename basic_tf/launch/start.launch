@@ -1,16 +1,18 @@
 <launch>
 
-  <node pkg="basic_tf" type="repub_imu.py" name="repub_imu" output="screen" />
-  <node pkg="basic_tf" type="pose_imu_2_odom.py" name="pose_imu_2_odom" output="screen" />
-  <node pkg="basic_tf" type="image_convert.py" name="image_convert" output="screen" />
+  <!-- <node pkg="basic_tf" type="repub_imu.py" name="repub_imu" output="screen" /> -->
+  <!-- <node pkg="basic_tf" type="pose_imu_2_odom.py" name="pose_imu_2_odom" output="screen" /> -->
+  <!-- <node pkg="basic_tf" type="image_convert.py" name="image_convert" output="screen" /> -->
 
-  <node pkg="tf" type="static_transform_publisher" name="tf_base_FRD" args="0 0 0 1 0 0 0 base_link base_link_frd 1000"/>
-  <node pkg="tf" type="static_transform_publisher" name="tf_odom_FRD" args="0 0 0 0 0 0 odom odom_frd 1000"/>
+  <node pkg="tf" type="static_transform_publisher" name="tf_odom_odom_cam" args="0 0 0 -0.5 0.5 -0.5 0.5 odom odom_camera 10"/>
+  <node pkg="tf" type="static_transform_publisher" name="tf_cam_cam" args="0 0 0 0.5 -0.5 0.5 0.5 camera base_link 10"/>
+  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_base_FRD" args="0 0 0 1 0 0 0 base_link base_link_frd 10"/> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_odom_FRD" args="0 0 0 0 0 0 odom odom_frd 10"/> -->
 
-  <node pkg="tf" type="static_transform_publisher" name="tf_base_imu" args="0 0 0 0 0 0 base_link imu 1000"/>
-  <node pkg="tf" type="static_transform_publisher" name="tf_base_camera" args="0 0 0 0 0 0 base_link camera 1000"/>
+  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_base_imu" args="0 0 0 0 0 0 base_link imu 10"/> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_base_camera" args="0 0 0 0 0 0 base_link camera 10"/> -->
 
-  <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+  <!-- <include file="$(find basic_tf)/launch/rs_camera.launch" /> -->
   <include file="$(find orbbec_camera)/launch/gemini2.launch" />
 
 </launch>

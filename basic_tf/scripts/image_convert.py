@@ -16,14 +16,20 @@ class ImageConverter:
     def callback1(self, data):
         try:
             cv_image = self.bridge.compressed_imgmsg_to_cv2(data, "passthrough")
-            self.image_pub1.publish(self.bridge.cv2_to_imgmsg(cv_image, "mono8"))
+            msg = self.bridge.cv2_to_imgmsg(cv_image, "mono8")
+            msg.header.frame_id = data.header.frame_id
+            msg.header.stamp = data.header.stamp
+            self.image_pub1.publish(msg)
         except CvBridgeError as e:
             rospy.loginfo(e)
 
     def callback2(self, data):
         try:
             cv_image = self.bridge.compressed_imgmsg_to_cv2(data, "passthrough")
-            self.image_pub2.publish(self.bridge.cv2_to_imgmsg(cv_image, "mono8"))  
+            msg = self.bridge.cv2_to_imgmsg(cv_image, "mono8")
+            msg.header.frame_id = data.header.frame_id
+            msg.header.stamp = data.header.stamp
+            self.image_pub2.publish(msg)
         except CvBridgeError as e:
             rospy.loginfo(e)
 
