@@ -28,7 +28,7 @@ def main():
 
     rospy.loginfo('Listening from odom to base_link, publish it to /odom')
 
-    rate = rospy.Rate(100.0)
+    rate = rospy.Rate(1000.0)
     while not rospy.is_shutdown():
         try:
             trans = tf_buffer.lookup_transform('odom', 'base_link', rospy.Time.now(), rospy.Duration(1.0))

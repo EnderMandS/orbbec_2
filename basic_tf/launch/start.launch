@@ -16,4 +16,6 @@
   <!-- <include file="$(find basic_tf)/launch/rs_camera.launch" /> -->
   <include file="$(find orbbec_camera)/launch/gemini2.launch" />
 
+  <!-- <include file="$(find uav_link)/launch/px4.launch" /> -->
+
 </launch>
