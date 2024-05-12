@@ -7,6 +7,7 @@ import rospy
 import tf2_ros
 import tf_conversions
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseStamped
 
 def tf_to_odom(tf):
     odom = Odometry()
@@ -26,6 +27,7 @@ def main():
 
     odom_pub = rospy.Publisher('/odom', Odometry, queue_size=5)
     mavros_odom_pub = rospy.Publisher('/mavros/odometry/out', Odometry, queue_size=5)
+    mavros_local_pose_pub = rospy.Publisher('/mavros/local_position/pose', PoseStamped, queue_size=5)
 
     rospy.loginfo('Listening from odom to base_link, publish it to /odom')
 
@@ -36,6 +38,12 @@ def main():
             msg = tf_to_odom(trans)
             odom_pub.publish(msg)
             mavros_odom_pub.publish(msg)
+
+            pose = PoseStamped()
+            pose.header.stamp = msg.header.stamp
+            pose.header.frame_id = "odom"
+            pose.pose = msg.pose.pose
+            mavros_local_pose_pub.publish(pose)
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
             # rospy.logwarn("%s", e)
             continue

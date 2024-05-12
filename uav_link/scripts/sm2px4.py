@@ -6,19 +6,25 @@ from std_srvs.srv import Empty
 from mavros_msgs.msg import State
 from mavros_msgs.srv import CommandBool, CommandBoolRequest, SetMode, SetModeRequest
 
+def checkExit():
+    if rospy.is_shutdown():
+        rospy.logwarn("SM2PX4 user exit.")
+        rospy.signal_shutdown("User exit.")
+        exit()
+
 class SM2PX4(object):
     def __init__(self) -> None:
         rospy.init_node('state_machine_to_px4', anonymous=True)
         rospy.on_shutdown(self.shutdownCb)
 
         self.timer = rospy.Timer(rospy.Duration(0.1), self.timerCb)
-        rospy.Subscriber("mavros/state", State, Cb=self.mavrosStateCb)
-        rospy.Subscriber("/sm/pose", PoseStamped, Cb=self.poseCb)
+        rospy.Subscriber("/mavros/state", State, callback=self.mavrosStateCb)
+        rospy.Subscriber("/sm/pose", PoseStamped, callback=self.poseCb)
         rospy.Service("land", Empty, self.landCb)
-        self.pos_pub = rospy.Publisher("mavros/setpoint_position/local", PoseStamped, queue_size=10)
+        self.pos_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
 
         rospy.wait_for_service("/mavros/cmd/arming")
-        self.arming_client = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)    
+        self.arming_client = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)    
         rospy.wait_for_service("/mavros/set_mode")
         self.set_mode_client = rospy.ServiceProxy("mavros/set_mode", SetMode)
 
@@ -39,7 +45,8 @@ class SM2PX4(object):
         self.pose = msg
 
     def timerCb(self, event=None):
-        self.pos_pub.publish(self.pose)
+        pose = self.pose
+        self.pos_pub.publish(pose)
 
     def landCb(self, req):
         set_mode = SetModeRequest()
@@ -49,7 +56,7 @@ class SM2PX4(object):
         self.timer.shutdown()
 
     def shutdownCb(self):
-        rospy.loginfo("SM2PX4 shutting down...")
+        rospy.loginfo("SM2PX4 shut down.")
         # set_mode = SetModeRequest()
         # set_mode.custom_mode = 'POSCTL'
         # if self.set_mode_client.call(set_mode).mode_sent == True:
@@ -62,21 +69,32 @@ class SM2PX4(object):
 if __name__ == '__main__':
     sm2px4 = SM2PX4()
     rospy.loginfo("State machine to px4 start.")
-    rospy.sleep(1.0)
+    rospy.sleep(3.0)
 
-    set_mode = SetModeRequest()
-    set_mode.custom_mode = 'POSCTL'
-    if sm2px4.set_mode_client.call(set_mode).mode_sent == True:
-        rospy.logwarn("Drone have set to position control.")
-    set_mode.custom_mode = 'OFFBOARD'
-    if sm2px4.set_mode_client.call(set_mode).mode_sent == True:
-        rospy.logwarn("Drone OFFBOARD enable.")
-    else:
-        rospy.signal_shutdown("Fail to set OFFBOARD mode.")
+    # rospy.logwarn("Going to arm!!")
+    # rospy.sleep(1.0)
+    # rospy.logwarn("Going to arm!!")
+    # arm_cmd = CommandBoolRequest()
+    # arm_cmd.value = True
+    # if sm2px4.arming_client.call(arm_cmd).success == True:
+    #     rospy.logwarn("Drone Armed.")
 
-    arm_cmd = CommandBoolRequest()
-    arm_cmd.value = True
-    if sm2px4.arming_client.call(arm_cmd).success == True:
-        rospy.logwarn("Drone Armed.")
+    # set_mode = SetModeRequest()
+    # # set_mode.custom_mode = 'POSCTL'
+    # # if sm2px4.set_mode_client.call(set_mode).mode_sent == True:
+    # #     rospy.logwarn("Drone have set to position control.")
+    # rospy.logwarn("Setting to OFFBOARD")
+    # set_mode.custom_mode = 'OFFBOARD'
+    # if sm2px4.set_mode_client.call(set_mode).mode_sent == True:
+    #     rospy.logwarn("Drone OFFBOARD enable.")
+    # else:
+    #     rospy.logerr("Fail to set OFFBOARD mode.")
+    #     rospy.signal_shutdown("Fail to set OFFBOARD mode.")
+
+    # Wait for px4 OFFBOARD mode
+    while sm2px4.state.mode != "OFFBOARD":
+        checkExit()
+        rospy.loginfo("SM2PX4 Waiting for OFFBOARD.")
+        rospy.sleep(2.0)
 
     rospy.spin()
