@@ -17,16 +17,11 @@ class SM2PX4(object):
         rospy.init_node('state_machine_to_px4', anonymous=True)
         rospy.on_shutdown(self.shutdownCb)
 
-        self.timer = rospy.Timer(rospy.Duration(0.1), self.timerCb)
+        self.timer = rospy.Timer(rospy.Duration(0.05), self.timerCb)
         rospy.Subscriber("/mavros/state", State, callback=self.mavrosStateCb)
         rospy.Subscriber("/sm/pose", PoseStamped, callback=self.poseCb)
         rospy.Service("land", Empty, self.landCb)
         self.pos_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
-
-        rospy.wait_for_service("/mavros/cmd/arming")
-        self.arming_client = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)    
-        rospy.wait_for_service("/mavros/set_mode")
-        self.set_mode_client = rospy.ServiceProxy("mavros/set_mode", SetMode)
 
         self.state = State()
         self.pose = PoseStamped()
@@ -38,6 +33,11 @@ class SM2PX4(object):
         self.pose.pose.orientation.z = 0
         self.pose.pose.orientation.w = 1
 
+        rospy.wait_for_service("/mavros/cmd/arming")
+        self.arming_client = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)    
+        rospy.wait_for_service("/mavros/set_mode")
+        self.set_mode_client = rospy.ServiceProxy("/mavros/set_mode", SetMode)
+
     def mavrosStateCb(self, msg):
         self.state = msg
 
@@ -45,8 +45,7 @@ class SM2PX4(object):
         self.pose = msg
 
     def timerCb(self, event=None):
-        pose = self.pose
-        self.pos_pub.publish(pose)
+        self.pos_pub.publish(self.pose)
 
     def landCb(self, req):
         set_mode = SetModeRequest()
@@ -69,7 +68,7 @@ class SM2PX4(object):
 if __name__ == '__main__':
     sm2px4 = SM2PX4()
     rospy.loginfo("State machine to px4 start.")
-    rospy.sleep(3.0)
+    rospy.sleep(0.5)
 
     # rospy.logwarn("Going to arm!!")
     # rospy.sleep(1.0)
@@ -92,9 +91,10 @@ if __name__ == '__main__':
     #     rospy.signal_shutdown("Fail to set OFFBOARD mode.")
 
     # Wait for px4 OFFBOARD mode
-    while sm2px4.state.mode != "OFFBOARD":
-        checkExit()
-        rospy.loginfo("SM2PX4 Waiting for OFFBOARD.")
-        rospy.sleep(2.0)
+    # while sm2px4.state.mode != "OFFBOARD":
+    #     checkExit()
+    #     rospy.loginfo("SM2PX4 Waiting for OFFBOARD.")
+    #     rospy.sleep(2.0)
 
+    rospy.logwarn("SM2PX4 spin")
     rospy.spin()

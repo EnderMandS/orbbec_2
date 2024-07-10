@@ -1,16 +1,13 @@
 <launch>
-  <node pkg="basic_tf" type="tf_listen.py" name="tf_listen_odom" output="screen" />
+  <!-- <node pkg="basic_tf" type="tf_listen.py" name="tf_listen_odom" output="screen" />
   <node pkg="uav_link" type="px4_state.py" name="publish_px4_state" output="screen" />
   <node pkg="uav_link" type="sm2px4.py" name="state_machine_2_px4" output="screen" />
-  <node pkg="uav_link" type="state_machine.py" name="state_machine" output="screen" />
+  <node pkg="uav_link" type="state_machine.py" name="state_machine" output="screen" /> -->
 
-  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_base_FRD" args="0 0 0 1 0 0 0 base_link base_link_frd 10"/> -->
-  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_odom_FRD" args="0 0 0 0 0 0 odom odom_frd 10"/> -->
-  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_base_imu" args="0 0 0 0 0 0 base_link imu 10"/> -->
-  <!-- <node pkg="tf" type="static_transform_publisher" name="tf_base_camera" args="0 0 0 0 0 0 base_link camera 10"/> -->
+  <!-- <node pkg="basic_tf" type="save_image.py" name="image_saver" output="screen" /> -->
 
   <!-- <include file="$(find basic_tf)/launch/rs_camera.launch" /> -->
   <include file="$(find orbbec_camera)/launch/gemini2.launch" />
-  <include file="$(find uav_link)/launch/px4.launch" />
+  <!-- <include file="$(find uav_link)/launch/px4.launch" /> -->
 
 </launch>

@@ -1,46 +1,37 @@
 #!/usr/bin/env python
 
+import os
 import rospy
-from std_srvs.srv import Empty
 from sensor_msgs.msg import Image
 import cv2
 import cv_bridge
-from datetime import datetime
 
 class ImageSaver:
     def __init__(self):
         self.bridge = cv_bridge.CvBridge()
-        self.image_received = False
-        self.image = None
-        # Subscribe to the camera topic
-        self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
-        # Create the service
-        self.service = rospy.Service('save_image', Empty, self.cb_save_image)
+        self.image_sub = rospy.Subscriber("/camera_orb/color/image_raw", Image, self.callback)
+        self.counter = 0
+        self.save_dir = os.path.expanduser('~/dataset/reconstruct/1')  # specify your directory here
 
-    def image_callback(self, data):
-        # Convert the image data to a cv2 image
+    def callback(self, data):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-        except cv_bridge.CvBridgeError as e:
-            rospy.logerr(e)
-            return
+        except cv_bridge.cvCvBridgeError as e:
+            rospy.loginfo(e)
 
-        self.image = cv_image
-        self.image_received = True
+        img_name = os.path.join(self.save_dir, str(self.counter).zfill(3) + ".png")
+        cv2.imwrite(img_name, cv_image)
+        rospy.loginfo("Save image: %s" % (img_name))
+        self.counter += 1
 
-    def cb_save_image(self, req):
-        if self.image_received:
-            self.image_received = False
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            # Save the image to a png file
-            cv2.imwrite(f'/home/uav/ros_ws/images/{timestamp}.png', self.image)
-            rospy.loginfo("Image saved.")
-        else:
-            rospy.loginfo("No new image received yet.")
-        return
-
-if __name__ == '__main__':
+def main():
     rospy.init_node('image_saver', anonymous=True)
     image_saver = ImageSaver()
     rospy.loginfo("Image saver start.")
-    rospy.spin()
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        rospy.loginfo("Shutting down")
+
+if __name__ == '__main__':
+    main()
