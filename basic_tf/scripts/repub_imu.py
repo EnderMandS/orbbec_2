@@ -38,11 +38,11 @@ def imu_listener():
 
     # Subscribe to the /imu_raw topic
     # rospy.Subscriber('/camera_intel/imu', Imu, callback)
-    rospy.Subscriber('/camera_orb/gyro_accel/sample', Imu, callback)
+    rospy.Subscriber('camera_orb/gyro_accel/sample', Imu, callback)
 
     # Define the publisher
     global pub, pub2
-    pub = rospy.Publisher('/imu', Imu, queue_size=10)
+    pub = rospy.Publisher('camera_orb/imu', Imu, queue_size=10)
     # pub2 = rospy.Publisher('/imu_euroc', Imu, queue_size=10)
 
     rospy.loginfo("Republish imu topic, change child frame id.")
