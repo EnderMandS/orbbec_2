@@ -1,38 +1,47 @@
 <launch>
   <arg name="drone_id" value="0"/>
-  <param name="/drone_id" value="$(arg drone_id)"/>
+  <node pkg="tf" type="static_transform_publisher" name="world_drone$(arg drone_id)_odom"
+          args="0 0 0 0 0 0 world drone_$(arg drone_id)/odom 1" />
+  <node pkg="tf" type="static_transform_publisher" name="drone$(arg drone_id)_odom_map"
+          args="0 0 0 0 0 0 drone_$(arg drone_id)/odom drone_$(arg drone_id)/map 1" />
 
   <group ns="drone_$(arg drone_id)">
-    <node pkg="basic_tf" type="repub_imu.py" name="orbbec_republish_imu" output="screen" >
-      <param name="tf_prefix" value="drone_$(arg drone_id)" />
-    </node>
-
-    <!-- <node pkg="uav_link" type="px4_state.py" name="publish_px4_state" output="screen" />
+    <node pkg="uav_link" type="px4_state.py" name="publish_px4_state" output="screen" />
     <node pkg="uav_link" type="sm2px4.py" name="state_machine_2_px4" output="screen" />
-    <node pkg="uav_link" type="state_machine.py" name="state_machine" output="screen" /> -->
+    <node pkg="uav_link" type="state_machine.py" name="state_machine" output="screen" />
 
     <!-- <node pkg="basic_tf" type="save_image.py" name="image_saver" output="screen" /> -->
 
-    <!-- <include file="$(find uav_link)/launch/px4.launch" />
+    <!-- PX4 -->
+    <include file="$(find uav_link)/launch/px4.launch" >
       <arg name="drone_id" value="$(arg drone_id)"/>
-    </include> -->
+    </include>
 
     <!-- t265 -->
     <include file="$(find basic_tf)/launch/rs_t265.launch">
       <arg name="drone_id" value="$(arg drone_id)"/>
     </include>
     <node pkg="tf" type="static_transform_publisher" name="t265_convert"
-          args="0 0 0 0 1.570796326794 0 world drone_$(arg drone_id)/camera_t265_odom_frame 1" />
+          args="0 0 0 0 1.570796326794 0 drone_$(arg drone_id)/odom drone_$(arg drone_id)/camera_t265_odom_frame 1" />
+    <node pkg="tf" type="static_transform_publisher" name="t265_convert2"
+          args="0 0 0 0 0 0 drone_$(arg drone_id)/camera_t265_link drone_$(arg drone_id)/base_link 1" />
     <node pkg="basic_tf" type="tf_listen.py" name="tf_listen_t265" output="screen" >
-      <param name="frame_id" value="world"/>
-      <param name="child_frame_id" value="drone_$(arg drone_id)/camera_t265_link"/>
-      <param name="publish_frame_id" value="drone_$(arg drone_id)"/>
+      <param name="frame_id" value="drone_$(arg drone_id)/odom"/>
+      <param name="child_frame_id" value="drone_$(arg drone_id)/base_link"/>
     </node>
 
-    <include file="$(find orbbec_camera)/launch/gemini2.launch" />
+    <!-- orbbec camera -->
+    <!-- <include file="$(find orbbec_camera)/launch/gemini2.launch" >
+      <arg name="camera_name" value="drone_$(arg drone_id)/camera_orb"/>
+    </include>
+    <node pkg="basic_tf" type="repub_imu.py" name="orbbec_republish_imu" output="screen" >
+      <param name="tf_prefix" value="drone_$(arg drone_id)" />
+    </node> -->
+
+    <!-- ego-swarm test -->
+    <!-- <node pkg="uav_link" type="test_ego.py" name="test_ego" output="screen" /> -->
+
+    <!-- <include file="$(find basic_tf)/launch/rs_camera.launch" /> -->
   </group>
 
-  <!-- <include file="$(find basic_tf)/launch/rs_camera.launch" >
-    <arg name="drone_id" value="$(arg drone_id)"/>
-  </include> -->
 </launch>

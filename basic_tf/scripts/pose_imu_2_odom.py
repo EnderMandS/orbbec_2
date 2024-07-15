@@ -10,9 +10,9 @@ class PoseImuToOdometry:
     def __init__(self):
         self.pose = None
         self.imu = None
-        self.pose_sub = rospy.Subscriber('/svo/pose_cam/0', PoseStamped, self.pose_callback)
-        self.imu_sub = rospy.Subscriber('/imu', Imu, self.imu_callback)
-        self.pub = rospy.Publisher('/odom', Odometry, queue_size=10)
+        self.pose_sub = rospy.Subscriber('svo/pose_cam/0', PoseStamped, self.pose_callback)
+        self.imu_sub = rospy.Subscriber('imu', Imu, self.imu_callback)
+        self.pub = rospy.Publisher('odom', Odometry, queue_size=10)
 
     def pose_callback(self, msg):
         self.pose = msg

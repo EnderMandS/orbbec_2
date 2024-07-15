@@ -11,8 +11,8 @@ def timerCb(event=None):
     pub.publish(status)
 
 if __name__ == "__main__":
-    rospy.init_node("publish_CompanionProcessStatus", anonymous=True)
-    pub = rospy.Publisher('/mavros/companion_process/status', CompanionProcessStatus, queue_size=10)
+    rospy.init_node("publish_CompanionProcessStatus")
+    pub = rospy.Publisher('mavros/companion_process/status', CompanionProcessStatus, queue_size=10)
     timer = rospy.Timer(rospy.Duration(0.1), timerCb)
     rospy.spin()
 

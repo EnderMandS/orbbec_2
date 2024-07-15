@@ -9,14 +9,14 @@ import tf_conversions
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 
-global frame_id, publish_frame_id
+global frame_id, child_frame_id
 
 def tf_to_odom(tf):
-    global frame_id, publish_frame_id
+    global frame_id, child_frame_id
     odom = Odometry()
     odom.header = tf.header
     odom.header.frame_id = frame_id
-    odom.child_frame_id = publish_frame_id
+    odom.child_frame_id = child_frame_id
     odom.pose.pose.position.x = tf.transform.translation.x
     odom.pose.pose.position.y = tf.transform.translation.y
     odom.pose.pose.position.z = tf.transform.translation.z
@@ -33,13 +33,13 @@ def main():
     mavros_odom_pub = rospy.Publisher('mavros/odometry/out', Odometry, queue_size=5)
     mavros_local_pose_pub = rospy.Publisher('mavros/local_position/pose', PoseStamped, queue_size=5)
 
-    global frame_id, publish_frame_id
+    global frame_id, child_frame_id
     node_name = rospy.get_name()
-    frame_id = rospy.get_param(node_name+"/frame_id","world")
-    child_frame_id = rospy.get_param(node_name+"/child_frame_id","odom")
-    publish_frame_id = rospy.get_param(node_name+"/publish_frame_id","odom")
+    frame_id = rospy.get_param(node_name+"/frame_id","odom")
+    child_frame_id = rospy.get_param(node_name+"/child_frame_id","base_link")
  
     rospy.loginfo('Listening from ' +frame_id +' to ' +child_frame_id)
+    rospy.sleep(1.0)
 
     rate = rospy.Rate(100.0)
     while not rospy.is_shutdown():
@@ -53,7 +53,7 @@ def main():
 
             pose = PoseStamped()
             pose.header.stamp = msg.header.stamp
-            pose.header.frame_id = publish_frame_id
+            pose.header.frame_id = frame_id
             pose.pose = msg.pose.pose
             mavros_local_pose_pub.publish(pose)
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:

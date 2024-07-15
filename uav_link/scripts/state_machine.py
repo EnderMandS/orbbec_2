@@ -29,16 +29,16 @@ def checkExit():
 
 class StateMachine(object):
     def __init__(self) -> None:
-        rospy.init_node('state_machine', anonymous=True)
+        rospy.init_node('state_machine')
         rospy.on_shutdown(self.shutdownCb)
 
-        rospy.Subscriber("/odom", Odometry, self.odomCb)
-        rospy.Subscriber("/planning/exec_state", ExecStatus, self.egoStateCb)
-        rospy.Subscriber('/planning/pos_cmd_geo', PoseStamped, self.egoPoseCb)
-        rospy.Subscriber("/mavros/state", State, callback=self.mavrosStateCb)
-        self.nav_pub = rospy.Publisher("/waypoint_generator/waypoints", Path, queue_size=5)
+        rospy.Subscriber("odom", Odometry, self.odomCb)
+        rospy.Subscriber("planning/exec_state", ExecStatus, self.egoStateCb)
+        rospy.Subscriber('planning/pos_cmd', PoseStamped, self.egoPoseCb)
+        rospy.Subscriber("mavros/state", State, callback=self.mavrosStateCb)
+        self.ego_goal_pub = rospy.Publisher("goal", PoseStamped, queue_size=1)
         self.land_client = rospy.ServiceProxy("land", Empty)
-        self.pose_pub = rospy.Publisher("/sm/pose", PoseStamped, queue_size=5)
+        self.pose_pub = rospy.Publisher("sm/pose", PoseStamped, queue_size=5)
 
         self.ego_state = ExecStatus.EXEC_STATUS_INIT
         self.ego_sent = False
@@ -162,9 +162,6 @@ class StateMachine(object):
         if self.checkArrive(x, y, z, yaw) == True:
             rospy.loginfo("Already in (%.2f, %.2f, %.2f, %.2f)" % (x, y, z, yaw))
             return
-        path = Path()
-        path.header.frame_id = "odom"
-        path.header.stamp = rospy.Time.now()
         pose = PoseStamped()
         q = quaternion_from_euler(0, 0, yaw)
         pose.pose.orientation.x = q[0]
@@ -174,8 +171,7 @@ class StateMachine(object):
         pose.pose.position.x = x
         pose.pose.position.y = y
         pose.pose.position.z = z
-        path.poses.append(pose)
-        self.nav_pub.publish(path)
+        self.ego_goal_pub.publish(pose)
         rospy.sleep(0.1)
         self.ego_sent = True
 
@@ -230,7 +226,7 @@ if __name__ == '__main__':
     #     rospy.sleep(2.0)
     # rospy.sleep(3.0)
 
-    # Wait for ORB-SLAM3 odom
+    # Wait for odom
     while not sm.waitOdomUpdate():
         checkExit()
         pass
@@ -248,44 +244,26 @@ if __name__ == '__main__':
     checkExit()
 
     # Take off
-    sm.gotoTarget(0, 0, 0.4, 0.0)
+    sm.gotoTarget(0, 0, 0.2, 0.0)
     rospy.sleep(1.0)
     checkExit()
 
-    sm.turn360()
+    # sm.turn360()
+    # rospy.sleep(3.0)
+    # checkExit()
+
+    sm.gotoTarget(0.5, 0.0, 0.2, 0.0)
+    rospy.sleep(1.0)
+    checkExit()
+
+    # sm.turn180()
+    # rospy.sleep(3.0)
+    # checkExit()
+
+    sm.gotoTarget(0, 0, 0.2, 0.0)
     rospy.sleep(3.0)
     checkExit()
 
-    sm.gotoTarget(2.0, 0.0, 0.4, 0.0)
-    rospy.sleep(1.0)
-    checkExit()
-
-    sm.turn180()
-    rospy.sleep(3.0)
-    checkExit()
-
-    sm.gotoTarget(1.5, 0.0, 0.4, pi)
-    rospy.sleep(1.0)
-    checkExit()
-
-    sm.gotoTarget(1.0, 0.0, 0.4, pi)
-    rospy.sleep(1.0)
-    checkExit()
-
-    sm.gotoTarget(0.5, 0.0, 0.4, pi)
-    rospy.sleep(1.0)
-    checkExit()
-
-    sm.gotoTarget(0, 0, 0.15, pi)
-    rospy.sleep(3.0)
-    checkExit()
-
-    rospy.logwarn("Land by hand.")
-    rospy.logwarn("Land by hand.")
-    rospy.logwarn("Land by hand.")
-    rospy.logwarn("Land by hand.")
-    rospy.logwarn("Land by hand.")
-    rospy.logwarn("Land by hand.")
     rospy.logwarn("Land by hand.")
     rospy.logwarn("Land by hand.")
     rospy.logwarn("Land by hand.")

@@ -9,7 +9,7 @@ import cv_bridge
 class ImageSaver:
     def __init__(self):
         self.bridge = cv_bridge.CvBridge()
-        self.image_sub = rospy.Subscriber("/camera_orb/color/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("camera_orb/color/image_raw", Image, self.callback)
         self.counter = 0
         self.save_dir = os.path.expanduser('~/dataset/reconstruct/1')  # specify your directory here
 

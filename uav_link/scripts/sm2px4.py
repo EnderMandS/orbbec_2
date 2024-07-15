@@ -14,14 +14,14 @@ def checkExit():
 
 class SM2PX4(object):
     def __init__(self) -> None:
-        rospy.init_node('state_machine_to_px4', anonymous=True)
+        rospy.init_node('state_machine_to_px4')
         rospy.on_shutdown(self.shutdownCb)
 
         self.timer = rospy.Timer(rospy.Duration(0.05), self.timerCb)
-        rospy.Subscriber("/mavros/state", State, callback=self.mavrosStateCb)
-        rospy.Subscriber("/sm/pose", PoseStamped, callback=self.poseCb)
+        rospy.Subscriber("mavros/state", State, callback=self.mavrosStateCb)
+        rospy.Subscriber("sm/pose", PoseStamped, callback=self.poseCb)
         rospy.Service("land", Empty, self.landCb)
-        self.pos_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
+        self.pos_pub = rospy.Publisher("mavros/setpoint_position/local", PoseStamped, queue_size=10)
 
         self.state = State()
         self.pose = PoseStamped()
@@ -33,10 +33,10 @@ class SM2PX4(object):
         self.pose.pose.orientation.z = 0
         self.pose.pose.orientation.w = 1
 
-        rospy.wait_for_service("/mavros/cmd/arming")
-        self.arming_client = rospy.ServiceProxy("/mavros/cmd/arming", CommandBool)    
-        rospy.wait_for_service("/mavros/set_mode")
-        self.set_mode_client = rospy.ServiceProxy("/mavros/set_mode", SetMode)
+        rospy.wait_for_service("mavros/cmd/arming")
+        self.arming_client = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)    
+        rospy.wait_for_service("mavros/set_mode")
+        self.set_mode_client = rospy.ServiceProxy("mavros/set_mode", SetMode)
 
     def mavrosStateCb(self, msg):
         self.state = msg
