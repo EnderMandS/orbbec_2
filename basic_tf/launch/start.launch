@@ -1,5 +1,6 @@
 <launch>
   <arg name="drone_id" value="0"/>
+
   <node pkg="tf" type="static_transform_publisher" name="world_drone$(arg drone_id)_odom"
           args="0 0 0 0 0 0 world drone_$(arg drone_id)/odom 1" />
   <node pkg="tf" type="static_transform_publisher" name="drone$(arg drone_id)_odom_map"
@@ -30,18 +31,17 @@
       <param name="child_frame_id" value="drone_$(arg drone_id)/base_link"/>
     </node>
 
-    <!-- orbbec camera -->
-    <!-- <include file="$(find orbbec_camera)/launch/gemini2.launch" >
-      <arg name="camera_name" value="drone_$(arg drone_id)/camera_orb"/>
-    </include>
-    <node pkg="basic_tf" type="repub_imu.py" name="orbbec_republish_imu" output="screen" >
+    <!-- <node pkg="basic_tf" type="repub_imu.py" name="orbbec_republish_imu" output="screen" >
       <param name="tf_prefix" value="drone_$(arg drone_id)" />
     </node> -->
 
     <!-- ego-swarm test -->
     <!-- <node pkg="uav_link" type="test_ego.py" name="test_ego" output="screen" /> -->
-
-    <!-- <include file="$(find basic_tf)/launch/rs_camera.launch" /> -->
   </group>
+
+  <!-- orbbec camera -->
+  <include file="$(find orbbec_camera)/launch/gemini2.launch" >
+    <arg name="camera_name" value="drone_$(arg drone_id)/camera_orb"/>
+  </include>
 
 </launch>

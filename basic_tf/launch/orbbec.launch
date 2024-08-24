@@ -1,0 +1,14 @@
+<launch>
+  <arg name="drone_id" value="0"/>
+
+  <include file="$(find orbbec_camera)/launch/gemini2.launch" >
+    <arg name="camera_name" value="drone_$(arg drone_id)/camera_orb"/>
+  </include>
+
+  <!-- <group ns="drone_$(arg drone_id)">
+    <node pkg="basic_tf" type="test_imu.py" name="test_imu" output="screen"/>
+    <node pkg="basic_tf" type="repub_imu.py" name="orbbec_republish_imu" output="screen" >
+      <param name="tf_prefix" value="drone_$(arg drone_id)" />
+    </node>
+  </group> -->
+</launch>

@@ -2,14 +2,14 @@
 
 import rospy
 from geometry_msgs.msg import PoseStamped
-from nav_msgs.msg import Odometry, Path
+from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
 from mavros_msgs.msg import State
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from math import pi
 
-from uav_link.msg import ExecStatus
+from quadrotor_msgs.msg import ExecStatus
 
 POSITION_ABS:float = 0.15  # m
 YAW_ABS:float = 10/180*pi  # rad
@@ -34,7 +34,7 @@ class StateMachine(object):
 
         rospy.Subscriber("odom", Odometry, self.odomCb)
         rospy.Subscriber("planning/exec_state", ExecStatus, self.egoStateCb)
-        rospy.Subscriber('planning/pos_cmd', PoseStamped, self.egoPoseCb)
+        rospy.Subscriber('planning/pos_cmd_geo', PoseStamped, self.egoPoseCb)
         rospy.Subscriber("mavros/state", State, callback=self.mavrosStateCb)
         self.ego_goal_pub = rospy.Publisher("goal", PoseStamped, queue_size=1)
         self.land_client = rospy.ServiceProxy("land", Empty)
