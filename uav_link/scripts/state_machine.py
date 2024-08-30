@@ -283,11 +283,19 @@ if __name__ == '__main__':
     rospy.sleep(1.0)
     checkExit()
 
+    sm.gotoTarget(3.0, 0, 0.3, 0.0)
+    rospy.sleep(1.0)
+    checkExit()
+
     sm.turn180()
     rospy.sleep(1.0)
     checkExit()
 
     sm.plannertoTarget(0, 0, 0.3, pi/2, 1.5)
+    rospy.sleep(1.0)
+    checkExit()
+
+    sm.gotoTarget(0, 0, 0.3, pi/2)
     rospy.sleep(1.0)
     checkExit()
 
@@ -298,32 +306,6 @@ if __name__ == '__main__':
     sm.gotoTarget(0, 0, 0.3, 0.0)
     rospy.sleep(1.0)
     checkExit()
-
-    # sm.gotoTarget(0.5, 0.0, 0.3, 0.0)
-    # rospy.sleep(1.0)
-    # checkExit()
-
-    # sm.turn180()
-    # rospy.sleep(3.0)
-    # checkExit()
-
-    # sm.gotoTarget(0, 0, 0.3, 0.0)
-    # rospy.sleep(1.0)
-    # checkExit()
-
-    # rospy.logwarn("Land by hand.")
-    # rospy.sleep(10.0)
-
-    # Look around
-    # sm.gotoTarget(0, 0, 0.25, pi/2)
-    # sm.gotoTarget(0, 0, 0.25, pi)
-    # sm.gotoTarget(0, 0, 0.25, -pi/2)
-    # sm.gotoTarget(0, 0, 0.25, 0)
-
-    # Planner to 
-    # sm.plannertoTarget(0.5, 0, 0.35, 0)
-
-    # sm.gotoTarget(0, 0, 0.25, 0)
 
     # Land
     sm.land()
