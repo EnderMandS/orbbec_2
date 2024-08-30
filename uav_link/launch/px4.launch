@@ -7,7 +7,7 @@
 	<arg name="odom_frame_id" value="drone_$(arg drone_id)/odom" />
 	<arg name="map_frame_id" value="drone_$(arg drone_id)/map" />
 
-	<arg name="fcu_url" default="/dev/ttyACM0:57600" />
+	<arg name="fcu_url" default="/dev/ttyACM0:115200" />
 	<arg name="gcs_url" default="" />
 	<arg name="tgt_system" default="1" />
 	<arg name="tgt_component" default="1" />

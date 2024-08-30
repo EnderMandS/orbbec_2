@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="uav_link" type="sm2px4.py" name="state_machine_2_px4" output="screen" />
+    <node pkg="uav_link" type="state_machine.py" name="state_machine" output="screen" />
+</launch>

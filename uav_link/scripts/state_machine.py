@@ -6,6 +6,7 @@ from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
 from mavros_msgs.msg import State
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from mavros_msgs.srv import CommandBool, CommandBoolRequest, SetMode, SetModeRequest
 
 from math import pi
 
@@ -37,8 +38,9 @@ class StateMachine(object):
         rospy.Subscriber('planning/pos_cmd_geo', PoseStamped, self.egoPoseCb)
         rospy.Subscriber("mavros/state", State, callback=self.mavrosStateCb)
         self.ego_goal_pub = rospy.Publisher("goal", PoseStamped, queue_size=1)
-        self.land_client = rospy.ServiceProxy("land", Empty)
         self.pose_pub = rospy.Publisher("sm/pose", PoseStamped, queue_size=5)
+        self.set_mode_client = rospy.ServiceProxy("mavros/set_mode", SetMode)
+        self.arming_client = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)
 
         self.ego_state = ExecStatus.EXEC_STATUS_INIT
         self.ego_sent = False
@@ -51,7 +53,7 @@ class StateMachine(object):
         self.odom_update = True
 
     def waitOdomUpdate(self):
-        rospy.loginfo("Waiting for odom update.")
+        rospy.loginfo("SM Waiting for odom update.")
         self.odom_update = False
         start_time = rospy.Time.now().to_sec()
         while self.odom_update==False:
@@ -189,6 +191,33 @@ class StateMachine(object):
         checkExit()
         rospy.sleep(1.0)
 
+    def takeoff(self):
+        set_mode = SetModeRequest()
+        set_mode.custom_mode = 'AUTO.TAKEOFF'
+        if self.set_mode_client.call(set_mode).mode_sent == True:
+            rospy.loginfo("Drone auto takeoff.")
+    
+    def land(self):
+        rospy.loginfo("SM drone going to land.")
+        set_mode = SetModeRequest()
+        set_mode.custom_mode = 'AUTO.LAND'
+        if self.set_mode_client.call(set_mode).mode_sent == True:
+            rospy.loginfo("Drone auto land.")
+    
+    def arm(self):
+        rospy.loginfo("SM drone going to arm.")
+        arm_cmd = CommandBoolRequest()
+        arm_cmd.value = True
+        if self.arming_client.call(arm_cmd).success == True:
+            rospy.logwarn("Drone armed.")
+    
+    def disArm(self):
+        rospy.loginfo("SM drone going to disArm.")
+        arm_cmd = CommandBoolRequest()
+        arm_cmd.value = False
+        if self.arming_client.call(arm_cmd).success == True:
+            rospy.logwarn("Drone disarmed.")
+
     def checkArrive(self, x:float, y:float, z:float, yaw:float):
         r, p, yaw_angle = euler_from_quaternion([ \
                 self.odom.pose.pose.orientation.x, \
@@ -211,63 +240,75 @@ class StateMachine(object):
 if __name__ == '__main__':
     sm = StateMachine()
     rospy.loginfo("State machine start.")
-    rospy.sleep(1.0)
+    rospy.sleep(0.1)
 
     # Wait for px4 connect
-    rospy.wait_for_service("land")
+    rospy.loginfo("SM Waiting for sm2px4 connect.")
+    rospy.wait_for_service("mavros/set_mode")
+    rospy.wait_for_service("mavros/cmd/arming")
     while sm.pose_pub.get_num_connections() < 1:
         checkExit()
-        rospy.loginfo("Waiting for sm2px4 connect.")
-        rospy.sleep(1.5)
+        rospy.sleep(0.1)
 
     # Wait for ego planner
-    # while sm.ego_state != ExecStatus.EXEC_STATUS_WAIT_TARGET:
-    #     rospy.loginfo("Waiting for ego planner.")
-    #     rospy.sleep(2.0)
-    # rospy.sleep(3.0)
+    rospy.loginfo("SM Waiting for ego planner.")
+    while sm.ego_state != ExecStatus.EXEC_STATUS_WAIT_TARGET:
+        rospy.sleep(0.1)
+        checkExit()
 
     # Wait for odom
+    rospy.loginfo("SM Waiting for odometry.")
     while not sm.waitOdomUpdate():
         checkExit()
-        pass
 
     # Wait for px4 OFFBOARD mode
+    rospy.loginfo("SM Waiting for OFFBOARD.")
     while sm.state.mode != "OFFBOARD":
         checkExit()
-        rospy.loginfo("SM Waiting for OFFBOARD.")
-        rospy.sleep(1.0)
+        rospy.sleep(0.1)
 
     rospy.logwarn("Ready to fly.")
-    rospy.logwarn("Ready to fly.")
-    rospy.logwarn("Ready to fly.")
-    rospy.sleep(1.5)
     checkExit()
 
     # Take off
-    sm.gotoTarget(0, 0, 0.2, 0.0)
+    sm.gotoTarget(0, 0, 0.3, 0.0)
     rospy.sleep(1.0)
     checkExit()
 
-    # sm.turn360()
-    # rospy.sleep(3.0)
+    sm.plannertoTarget(1.0, 0, 0.3, 0.0)
+    rospy.sleep(1.0)
+    checkExit()
+
+    sm.turn180()
+    rospy.sleep(1.0)
+    checkExit()
+
+    sm.plannertoTarget(0.0, 0, 0.3, pi/2)
+    rospy.sleep(1.0)
+    checkExit()
+
+    sm.turn180()
+    rospy.sleep(1.0)
+    checkExit()
+
+    sm.gotoTarget(0, 0, 0.3, 0.0)
+    rospy.sleep(1.0)
+    checkExit()
+
+    # sm.gotoTarget(0.5, 0.0, 0.3, 0.0)
+    # rospy.sleep(1.0)
     # checkExit()
-
-    sm.gotoTarget(0.5, 0.0, 0.2, 0.0)
-    rospy.sleep(1.0)
-    checkExit()
 
     # sm.turn180()
     # rospy.sleep(3.0)
     # checkExit()
 
-    sm.gotoTarget(0, 0, 0.2, 0.0)
-    rospy.sleep(3.0)
-    checkExit()
+    # sm.gotoTarget(0, 0, 0.3, 0.0)
+    # rospy.sleep(1.0)
+    # checkExit()
 
-    rospy.logwarn("Land by hand.")
-    rospy.logwarn("Land by hand.")
-    rospy.logwarn("Land by hand.")
-    rospy.sleep(20.0)
+    # rospy.logwarn("Land by hand.")
+    # rospy.sleep(10.0)
 
     # Look around
     # sm.gotoTarget(0, 0, 0.25, pi/2)
@@ -281,7 +322,9 @@ if __name__ == '__main__':
     # sm.gotoTarget(0, 0, 0.25, 0)
 
     # Land
-    # sm.land_client.call(Empty())
+    sm.land()
+    rospy.sleep(3.0)
+    sm.disArm()
 
     rospy.loginfo("All waypoint done exit.")
     rospy.signal_shutdown("All waypoint done exit.")

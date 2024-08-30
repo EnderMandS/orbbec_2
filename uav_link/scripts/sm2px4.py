@@ -20,7 +20,7 @@ class SM2PX4(object):
         self.timer = rospy.Timer(rospy.Duration(0.05), self.timerCb)
         rospy.Subscriber("mavros/state", State, callback=self.mavrosStateCb)
         rospy.Subscriber("sm/pose", PoseStamped, callback=self.poseCb)
-        rospy.Service("land", Empty, self.landCb)
+        # rospy.Service("land", Empty, self.landCb)
         self.pos_pub = rospy.Publisher("mavros/setpoint_position/local", PoseStamped, queue_size=10)
 
         self.state = State()
@@ -33,8 +33,8 @@ class SM2PX4(object):
         self.pose.pose.orientation.z = 0
         self.pose.pose.orientation.w = 1
 
-        rospy.wait_for_service("mavros/cmd/arming")
-        self.arming_client = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)    
+        # rospy.wait_for_service("mavros/cmd/arming")
+        # self.arming_client = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)    
         rospy.wait_for_service("mavros/set_mode")
         self.set_mode_client = rospy.ServiceProxy("mavros/set_mode", SetMode)
 
@@ -47,12 +47,12 @@ class SM2PX4(object):
     def timerCb(self, event=None):
         self.pos_pub.publish(self.pose)
 
-    def landCb(self, req):
-        set_mode = SetModeRequest()
-        set_mode.custom_mode = 'AUTO.LAND'
-        if self.set_mode_client.call(set_mode).mode_sent == True:
-            rospy.logwarn("Drone auto land.")
-        self.timer.shutdown()
+    # def landCb(self, req):
+    #     set_mode = SetModeRequest()
+    #     set_mode.custom_mode = 'AUTO.LAND'
+    #     if self.set_mode_client.call(set_mode).mode_sent == True:
+    #         rospy.loginfo("Drone auto land.")
+    #     self.timer.shutdown()
 
     def shutdownCb(self):
         rospy.loginfo("SM2PX4 shut down.")
@@ -96,5 +96,5 @@ if __name__ == '__main__':
     #     rospy.loginfo("SM2PX4 Waiting for OFFBOARD.")
     #     rospy.sleep(2.0)
 
-    rospy.logwarn("SM2PX4 spin")
+    rospy.loginfo("SM2PX4 spin")
     rospy.spin()

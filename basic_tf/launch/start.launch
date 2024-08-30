@@ -8,10 +8,7 @@
 
   <group ns="drone_$(arg drone_id)">
     <node pkg="uav_link" type="px4_state.py" name="publish_px4_state" output="screen" />
-    <node pkg="uav_link" type="sm2px4.py" name="state_machine_2_px4" output="screen" />
-    <node pkg="uav_link" type="state_machine.py" name="state_machine" output="screen" />
-
-    <!-- <node pkg="basic_tf" type="save_image.py" name="image_saver" output="screen" /> -->
+    <include file="$(find uav_link)/launch/sm.launch"/>
 
     <!-- PX4 -->
     <include file="$(find uav_link)/launch/px4.launch" >
@@ -23,7 +20,7 @@
       <arg name="drone_id" value="$(arg drone_id)"/>
     </include>
     <node pkg="tf" type="static_transform_publisher" name="t265_convert"
-          args="0 0 0 0 1.570796326794 0 drone_$(arg drone_id)/odom drone_$(arg drone_id)/camera_t265_odom_frame 1" />
+          args="0 0 0 0 0 0 drone_$(arg drone_id)/odom drone_$(arg drone_id)/camera_t265_odom_frame 1" />
     <node pkg="tf" type="static_transform_publisher" name="t265_convert2"
           args="0 0 0 0 0 0 drone_$(arg drone_id)/camera_t265_link drone_$(arg drone_id)/base_link 1" />
     <node pkg="basic_tf" type="tf_listen.py" name="tf_listen_t265" output="screen" >
