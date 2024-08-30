@@ -103,10 +103,11 @@ class StateMachine(object):
                 break
             checkExit()
             rospy.sleep(1.0)
+        rospy.logwarn("Going arrive (%.2f, %.2f, %.2f, %.2f)." % (x, y, z, yaw))
         checkExit()
-        rospy.sleep(1.0)
 
     def turn360(self):
+        rospy.logwarn("Turn 360.")
         start_position = self.odom.pose.pose.position
         r, p, yaw_angle = euler_from_quaternion([ \
                 self.odom.pose.pose.orientation.x, \
@@ -134,6 +135,7 @@ class StateMachine(object):
             checkExit()
 
     def turn180(self):
+        rospy.logwarn("Turn 180.")
         start_position = self.odom.pose.pose.position
         r, p, yaw_angle = euler_from_quaternion([ \
                 self.odom.pose.pose.orientation.x, \
@@ -160,10 +162,12 @@ class StateMachine(object):
             rospy.sleep(0.01)
             checkExit()
 
-    def plannertoTarget(self, x:float, y:float, z:float, yaw:float):
+    def plannertoTarget(self, x:float, y:float, z:float, yaw:float, delay:float=1.5):
         if self.checkArrive(x, y, z, yaw) == True:
             rospy.loginfo("Already in (%.2f, %.2f, %.2f, %.2f)" % (x, y, z, yaw))
             return
+        rospy.logwarn("Planner to (%.2f, %.2f, %.2f, %.2f)." % (x, y, z, yaw))
+
         pose = PoseStamped()
         q = quaternion_from_euler(0, 0, yaw)
         pose.pose.orientation.x = q[0]
@@ -174,11 +178,11 @@ class StateMachine(object):
         pose.pose.position.y = y
         pose.pose.position.z = z
         self.ego_goal_pub.publish(pose)
-        rospy.sleep(0.1)
+        rospy.sleep(delay+0.1)
         self.ego_sent = True
 
         start_time = rospy.Time.now().to_sec()
-        rospy.sleep(1.0)
+        rospy.sleep(0.5)
         while self.ego_state != ExecStatus.EXEC_STATUS_WAIT_TARGET:
             if rospy.Time.now().to_sec()-start_time > TIMEOUT:
                 self.ego_sent = False
@@ -187,9 +191,9 @@ class StateMachine(object):
                 break
             checkExit()
             rospy.sleep(1.0)
+        rospy.logwarn("Planner arrive (%.2f, %.2f, %.2f, %.2f)." % (x, y, z, yaw))
         self.ego_sent = False
         checkExit()
-        rospy.sleep(1.0)
 
     def takeoff(self):
         set_mode = SetModeRequest()
@@ -275,7 +279,7 @@ if __name__ == '__main__':
     rospy.sleep(1.0)
     checkExit()
 
-    sm.plannertoTarget(1.0, 0, 0.3, 0.0)
+    sm.plannertoTarget(3.0, 0, 0.3, 0.0, 0.0)
     rospy.sleep(1.0)
     checkExit()
 
@@ -283,7 +287,7 @@ if __name__ == '__main__':
     rospy.sleep(1.0)
     checkExit()
 
-    sm.plannertoTarget(0.0, 0, 0.3, pi/2)
+    sm.plannertoTarget(0, 0, 0.3, pi/2, 1.5)
     rospy.sleep(1.0)
     checkExit()
 

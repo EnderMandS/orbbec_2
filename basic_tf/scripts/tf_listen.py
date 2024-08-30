@@ -58,8 +58,8 @@ def main():
     frame_id = rospy.get_param(node_name+"/frame_id","odom")
     child_frame_id = rospy.get_param(node_name+"/child_frame_id","base_link")
  
+    rospy.sleep(5.0)
     rospy.loginfo('Listening from ' +frame_id +' to ' +child_frame_id)
-    rospy.sleep(1.0)
 
     rate = rospy.Rate(200.0)
     mav_pose_timer = Timer(2)
